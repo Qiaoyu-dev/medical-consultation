@@ -5,9 +5,12 @@ import re
 DISCLAIMER_PATTERN = re.compile(r"仅供参考")
 
 # 越界诊断/用药建议关键词检测：禁止模型给出确定性诊断或具体用药指导
+# 「您/你患有」需排除「如果/若/如/当…您患有」这类假设条件语境的误判
+# （如「如果您患有高血压…」并非确定性诊断），用负向零宽断言排除常见条件连词。
+_CONDITIONAL_GUARD = r"(?<![果若如当假令便])"
 OVERREACH_PATTERNS = [
-    re.compile(r"您患有"),
-    re.compile(r"你患有"),
+    re.compile(_CONDITIONAL_GUARD + r"您患有"),
+    re.compile(_CONDITIONAL_GUARD + r"你患有"),
     re.compile(r"确诊为"),
     re.compile(r"建议服用"),
     re.compile(r"建议(?:您|你)?服药"),
